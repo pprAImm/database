@@ -1,4 +1,4 @@
-module database
+module github.com/pprAImm/database
 
 go 1.26.3
 
