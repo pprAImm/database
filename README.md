@@ -56,16 +56,44 @@ sqlc generate
 ```
 
 ## Как использовать в другом модуле
-```go
-pool, err := database.Init()
-if err != nil {
-    log.Fatal(err)
-}
-defer pool.Close()
 
-queries := db.New(pool)
-categories, err := queries.GetAllCategories(ctx)
-```
+```go
+package main
+
+import (
+    "context"
+    "log"
+    
+    "github.com/pprAImm/database"
+    "github.com/pprAImm/database/store"
+)
+
+func main() {
+    // 1. Подключение к БД
+    pool, err := database.Init()
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer pool.Close()
+    
+    ctx := context.Background()
+    
+    // 2. Создаём Queries через публичную фабрику
+    queries := database.NewQueries(pool)
+    
+    // 3. Создаём Store (бизнес-слой)
+    storeInstance := store.NewStore(queries)
+    
+    // 4. Используем методы Store
+    categories, err := storeInstance.GetAllCategories(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    for _, cat := range categories {
+        log.Printf("Категория: %s (slug: %s)\n", cat.Name, cat.Slug)
+    }
+}```
 
 ## Переменные окружения
 

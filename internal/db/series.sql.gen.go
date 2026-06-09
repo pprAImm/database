@@ -19,9 +19,9 @@ RETURNING id, title, description, category_id, cover_url, rating
 
 type CreateSeriesParams struct {
 	Title       string
-	Description pgtype.Text
-	CategoryID  pgtype.Int8
-	CoverUrl    pgtype.Text
+	Description *string
+	CategoryID  *int64
+	CoverUrl    *string
 	Rating      pgtype.Numeric
 }
 
@@ -54,12 +54,12 @@ WHERE category_id = $1
 type GetSeriesByCategoryRow struct {
 	ID          int64
 	Title       string
-	Description pgtype.Text
-	CoverUrl    pgtype.Text
+	Description *string
+	CoverUrl    *string
 	Rating      pgtype.Numeric
 }
 
-func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID pgtype.Int8) ([]GetSeriesByCategoryRow, error) {
+func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]GetSeriesByCategoryRow, error) {
 	rows, err := q.db.Query(ctx, getSeriesByCategory, categoryID)
 	if err != nil {
 		return nil, err
@@ -94,8 +94,8 @@ WHERE id = $1
 type GetSeriesByIDRow struct {
 	ID          int64
 	Title       string
-	Description pgtype.Text
-	CoverUrl    pgtype.Text
+	Description *string
+	CoverUrl    *string
 	Rating      pgtype.Numeric
 }
 
@@ -121,12 +121,12 @@ WHERE title ILIKE '%' || $1 || '%'
 type SearchSeriesRow struct {
 	ID          int64
 	Title       string
-	Description pgtype.Text
-	CoverUrl    pgtype.Text
+	Description *string
+	CoverUrl    *string
 	Rating      pgtype.Numeric
 }
 
-func (q *Queries) SearchSeries(ctx context.Context, dollar_1 pgtype.Text) ([]SearchSeriesRow, error) {
+func (q *Queries) SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchSeriesRow, error) {
 	rows, err := q.db.Query(ctx, searchSeries, dollar_1)
 	if err != nil {
 		return nil, err

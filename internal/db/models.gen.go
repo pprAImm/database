@@ -16,17 +16,17 @@ type Category struct {
 
 type Episode struct {
 	ID         int64
-	SeriesID   pgtype.Int8
-	Title      pgtype.Text
+	SeriesID   *int64
+	Title      *string
 	TiktokUrl  string
-	EpisodeNum pgtype.Int4
+	EpisodeNum *int32
 }
 
 type Series struct {
 	ID          int64
 	Title       string
-	Description pgtype.Text
-	CategoryID  pgtype.Int8
-	CoverUrl    pgtype.Text
+	Description *string
+	CategoryID  *int64
+	CoverUrl    *string
 	Rating      pgtype.Numeric
 }

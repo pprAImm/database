@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createEpisode = `-- name: CreateEpisode :one
@@ -18,10 +16,10 @@ RETURNING id, series_id, title, tiktok_url, episode_num
 `
 
 type CreateEpisodeParams struct {
-	SeriesID   pgtype.Int8
-	Title      pgtype.Text
+	SeriesID   *int64
+	Title      *string
 	TiktokUrl  string
-	EpisodeNum pgtype.Int4
+	EpisodeNum *int32
 }
 
 func (q *Queries) CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (Episode, error) {
@@ -49,7 +47,7 @@ WHERE series_id = $1
 ORDER BY episode_num
 `
 
-func (q *Queries) GetEpisodesBySeries(ctx context.Context, seriesID pgtype.Int8) ([]Episode, error) {
+func (q *Queries) GetEpisodesBySeries(ctx context.Context, seriesID *int64) ([]Episode, error) {
 	rows, err := q.db.Query(ctx, getEpisodesBySeries, seriesID)
 	if err != nil {
 		return nil, err
