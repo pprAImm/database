@@ -6,18 +6,30 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	AddComment(ctx context.Context, arg AddCommentParams) (Comment, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (Episode, error)
 	CreateSeries(ctx context.Context, arg CreateSeriesParams) (Series, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	DeleteSession(ctx context.Context, id string) error
 	GetAllCategories(ctx context.Context) ([]Category, error)
+	GetAverageRating(ctx context.Context, seriesID *int64) (pgtype.Numeric, error)
 	GetCategoryBySlug(ctx context.Context, slug string) (Category, error)
+	GetCommentsBySeries(ctx context.Context, seriesID *int64) ([]GetCommentsBySeriesRow, error)
 	GetEpisodesBySeries(ctx context.Context, seriesID *int64) ([]Episode, error)
 	GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]GetSeriesByCategoryRow, error)
 	GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow, error)
+	GetSession(ctx context.Context, id string) (Session, error)
+	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
+	GetUserByID(ctx context.Context, id int64) (GetUserByIDRow, error)
 	SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchSeriesRow, error)
+	UpsertRating(ctx context.Context, arg UpsertRatingParams) (Rating, error)
 }
 
 var _ Querier = (*Queries)(nil)
