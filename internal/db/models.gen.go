@@ -5,6 +5,8 @@
 package db
 
 import (
+	"time"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -12,6 +14,14 @@ type Category struct {
 	ID   int64
 	Name string
 	Slug string
+}
+
+type Comment struct {
+	ID        int64
+	UserID    *int64
+	SeriesID  *int64
+	Body      string
+	CreatedAt time.Time
 }
 
 type Episode struct {
@@ -22,6 +32,14 @@ type Episode struct {
 	EpisodeNum *int32
 }
 
+type Rating struct {
+	ID        int64
+	UserID    *int64
+	SeriesID  *int64
+	Score     *int32
+	CreatedAt time.Time
+}
+
 type Series struct {
 	ID          int64
 	Title       string
@@ -29,4 +47,18 @@ type Series struct {
 	CategoryID  *int64
 	CoverUrl    *string
 	Rating      pgtype.Numeric
+}
+
+type Session struct {
+	ID        string
+	UserID    *int64
+	ExpiresAt time.Time
+}
+
+type User struct {
+	ID           int64
+	Username     string
+	Email        string
+	PasswordHash string
+	CreatedAt    time.Time
 }
