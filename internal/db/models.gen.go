@@ -36,7 +36,7 @@ type Rating struct {
 	ID        int64
 	UserID    *int64
 	SeriesID  *int64
-	Score     *int32
+	Rating    pgtype.Numeric
 	CreatedAt time.Time
 }
 
@@ -46,7 +46,6 @@ type Series struct {
 	Description *string
 	CategoryID  *int64
 	CoverUrl    *string
-	Rating      pgtype.Numeric
 }
 
 type Session struct {

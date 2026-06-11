@@ -12,7 +12,7 @@ import (
 )
 
 const getAverageRating = `-- name: GetAverageRating :one
-SELECT ROUND(AVG(score)::numeric, 1) as average
+SELECT ROUND(AVG(rating)::numeric, 1) as average
 FROM ratings WHERE series_id = $1
 `
 
@@ -24,27 +24,27 @@ func (q *Queries) GetAverageRating(ctx context.Context, seriesID *int64) (pgtype
 }
 
 const upsertRating = `-- name: UpsertRating :one
-INSERT INTO ratings (user_id, series_id, score)
+INSERT INTO ratings (user_id, series_id, rating)
 VALUES ($1, $2, $3)
 ON CONFLICT (user_id, series_id)
-DO UPDATE SET score = $3
-RETURNING id, user_id, series_id, score, created_at
+DO UPDATE SET rating = $3
+RETURNING id, user_id, series_id, rating, created_at
 `
 
 type UpsertRatingParams struct {
 	UserID   *int64
 	SeriesID *int64
-	Score    *int32
+	Rating   pgtype.Numeric
 }
 
 func (q *Queries) UpsertRating(ctx context.Context, arg UpsertRatingParams) (Rating, error) {
-	row := q.db.QueryRow(ctx, upsertRating, arg.UserID, arg.SeriesID, arg.Score)
+	row := q.db.QueryRow(ctx, upsertRating, arg.UserID, arg.SeriesID, arg.Rating)
 	var i Rating
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
 		&i.SeriesID,
-		&i.Score,
+		&i.Rating,
 		&i.CreatedAt,
 	)
 	return i, err
