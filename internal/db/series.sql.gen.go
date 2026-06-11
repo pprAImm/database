@@ -7,14 +7,12 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createSeries = `-- name: CreateSeries :one
-INSERT INTO series (title, description, category_id, cover_url, rating)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, title, description, category_id, cover_url, rating
+INSERT INTO series (title, description, category_id, cover_url)
+VALUES ($1, $2, $3, $4)
+RETURNING id, title, description, category_id, cover_url
 `
 
 type CreateSeriesParams struct {
@@ -22,7 +20,6 @@ type CreateSeriesParams struct {
 	Description *string
 	CategoryID  *int64
 	CoverUrl    *string
-	Rating      pgtype.Numeric
 }
 
 func (q *Queries) CreateSeries(ctx context.Context, arg CreateSeriesParams) (Series, error) {
@@ -31,7 +28,6 @@ func (q *Queries) CreateSeries(ctx context.Context, arg CreateSeriesParams) (Ser
 		arg.Description,
 		arg.CategoryID,
 		arg.CoverUrl,
-		arg.Rating,
 	)
 	var i Series
 	err := row.Scan(
@@ -40,13 +36,12 @@ func (q *Queries) CreateSeries(ctx context.Context, arg CreateSeriesParams) (Ser
 		&i.Description,
 		&i.CategoryID,
 		&i.CoverUrl,
-		&i.Rating,
 	)
 	return i, err
 }
 
 const getSeriesByCategory = `-- name: GetSeriesByCategory :many
-SELECT id, title, description, cover_url, rating
+SELECT id, title, description, cover_url
 FROM series
 WHERE category_id = $1
 `
@@ -56,7 +51,6 @@ type GetSeriesByCategoryRow struct {
 	Title       string
 	Description *string
 	CoverUrl    *string
-	Rating      pgtype.Numeric
 }
 
 func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]GetSeriesByCategoryRow, error) {
@@ -73,7 +67,6 @@ func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([
 			&i.Title,
 			&i.Description,
 			&i.CoverUrl,
-			&i.Rating,
 		); err != nil {
 			return nil, err
 		}
@@ -86,7 +79,7 @@ func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([
 }
 
 const getSeriesByID = `-- name: GetSeriesByID :one
-SELECT id, title, description, cover_url, rating
+SELECT id, title, description, cover_url
 FROM series
 WHERE id = $1
 `
@@ -96,7 +89,6 @@ type GetSeriesByIDRow struct {
 	Title       string
 	Description *string
 	CoverUrl    *string
-	Rating      pgtype.Numeric
 }
 
 func (q *Queries) GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow, error) {
@@ -107,13 +99,12 @@ func (q *Queries) GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow
 		&i.Title,
 		&i.Description,
 		&i.CoverUrl,
-		&i.Rating,
 	)
 	return i, err
 }
 
 const searchSeries = `-- name: SearchSeries :many
-SELECT id, title, description, cover_url, rating
+SELECT id, title, description, cover_url
 FROM series
 WHERE title ILIKE '%' || $1 || '%'
 `
@@ -123,7 +114,6 @@ type SearchSeriesRow struct {
 	Title       string
 	Description *string
 	CoverUrl    *string
-	Rating      pgtype.Numeric
 }
 
 func (q *Queries) SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchSeriesRow, error) {
@@ -140,7 +130,6 @@ func (q *Queries) SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchS
 			&i.Title,
 			&i.Description,
 			&i.CoverUrl,
-			&i.Rating,
 		); err != nil {
 			return nil, err
 		}

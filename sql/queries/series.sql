@@ -15,5 +15,5 @@ WHERE title ILIKE '%' || $1 || '%';
 
 -- name: CreateSeries :one
 INSERT INTO series (title, description, category_id, cover_url)
-VALUES ($1, $2, $3, $4, $5)
+VALUES ($1, $2, $3, $4)
 RETURNING *;

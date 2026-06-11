@@ -93,11 +93,18 @@ func (s *pgxStore) DeleteSession(ctx context.Context, id string) error {
 	return s.queries.DeleteSession(ctx, id)
 }
 
-func (s *pgxStore) UpsertRating(ctx context.Context, userID, seriesID *int64, score *int32) (db.Rating, error) {
+func (s *pgxStore) UpsertRating(ctx context.Context, userID, seriesID *int64, rating *int32) (db.Rating, error) {
+	var ratingNumeric pgtype.Numeric
+	if rating != nil {
+		if err := ratingNumeric.Scan(int64(*rating)); err != nil {
+			return db.Rating{}, err
+		}
+	}
+
 	params := db.UpsertRatingParams{
 		UserID:   userID,
 		SeriesID: seriesID,
-		Score:    score,
+		Rating:   ratingNumeric,
 	}
 	return s.queries.UpsertRating(ctx, params)
 }
