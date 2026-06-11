@@ -6,11 +6,11 @@
 ## Кратко
 
 Модуль предоставляет функции для подключения к PostgreSQL, выполнения запросов и управления транзакциями.
-Управляет метаданными: пользователи, контент, подписки.  
+Управляет метаданными: пользователи, контент.  
 
 ## Стек
 
-- PostgreSQL 17 (в Docker)
+- PostgreSQL 18-alpine (в Docker)
 - [sqlc](https://sqlc.dev/) — генерация Go-кода из SQL
 - [goose](https://github.com/pressly/goose) — миграции
 - [pgx/v5](https://github.com/jackc/pgx) — драйвер PostgreSQL для Go
