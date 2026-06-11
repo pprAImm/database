@@ -10,8 +10,7 @@ CREATE TABLE series (
     title       TEXT NOT NULL,
     description TEXT,
     category_id BIGINT REFERENCES categories(id),
-    cover_url   TEXT,
-    rating      NUMERIC(3,1)
+    cover_url   TEXT
 );
 
 CREATE TABLE episodes (

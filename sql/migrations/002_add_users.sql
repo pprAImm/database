@@ -17,7 +17,7 @@ CREATE TABLE ratings (
     id        BIGSERIAL PRIMARY KEY,
     user_id   BIGINT REFERENCES users(id),
     series_id BIGINT REFERENCES series(id),
-    score     INTEGER CHECK (score >= 1 AND score <= 10),
+    rating      NUMERIC(3,1),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (user_id, series_id)
 );
