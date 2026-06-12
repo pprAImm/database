@@ -21,6 +21,7 @@ type Store interface {
 	CreateSession(ctx context.Context, id string, userID *int64, expiresAt time.Time) (db.Session, error)
 	GetSession(ctx context.Context, id string) (db.Session, error)
 	DeleteSession(ctx context.Context, id string) error
+	DeleteSessionByToken(ctx context.Context, tokenID string) error
 	UpsertRating(ctx context.Context, userID, seriesID *int64, score *int32) (db.Rating, error)
 	GetAverageRating(ctx context.Context, seriesID *int64) (pgtype.Numeric, error)
 	AddComment(ctx context.Context, userID, seriesID *int64, body string) (db.Comment, error)
@@ -124,4 +125,8 @@ func (s *pgxStore) AddComment(ctx context.Context, userID, seriesID *int64, body
 
 func (s *pgxStore) GetCommentsBySeries(ctx context.Context, seriesID *int64) ([]db.GetCommentsBySeriesRow, error) {
 	return s.queries.GetCommentsBySeries(ctx, seriesID)
+}
+
+func (s *pgxStore) DeleteSessionByToken(ctx context.Context, tokenID string) error {
+	return s.queries.DeleteSession(ctx, tokenID)
 }
