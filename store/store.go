@@ -138,3 +138,7 @@ func (s *pgxStore) AddComment(ctx context.Context, userID, seriesID *int64, body
 func (s *pgxStore) GetCommentsBySeries(ctx context.Context, seriesID *int64) ([]db.GetCommentsBySeriesRow, error) {
 	return s.queries.GetCommentsBySeries(ctx, seriesID)
 }
+
+func (s *pgxStore) DeleteSessionByToken(ctx context.Context, tokenID string) error {
+	return s.queries.DeleteSession(ctx, tokenID)
+}
