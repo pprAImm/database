@@ -48,7 +48,8 @@ func NewStore(queries *db.Queries) Store {
 	return &pgxStore{queries: queries}
 }
 
-// Categories
+// ==================== CATEGORIES ====================
+
 func (s *pgxStore) GetAllCategories(ctx context.Context) ([]db.Category, error) {
 	return s.queries.GetAllCategories(ctx)
 }
@@ -57,7 +58,8 @@ func (s *pgxStore) GetCategoryBySlug(ctx context.Context, slug string) (db.Categ
 	return s.queries.GetCategoryBySlug(ctx, slug)
 }
 
-// Series
+// ==================== SERIES ====================
+
 func (s *pgxStore) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]db.GetSeriesByCategoryRow, error) {
 	return s.queries.GetSeriesByCategory(ctx, categoryID)
 }
@@ -70,12 +72,14 @@ func (s *pgxStore) SearchSeries(ctx context.Context, query *string) ([]db.Search
 	return s.queries.SearchSeries(ctx, query)
 }
 
-// Episodes
+// ==================== EPISODES ====================
+
 func (s *pgxStore) GetEpisodesBySeries(ctx context.Context, seriesID *int64) ([]db.Episode, error) {
 	return s.queries.GetEpisodesBySeries(ctx, seriesID)
 }
 
-// Users
+// ==================== USERS ====================
+
 func (s *pgxStore) CreateUser(ctx context.Context, username, email, passwordHash string) (db.CreateUserRow, error) {
 	params := db.CreateUserParams{
 		Username:     username,
@@ -93,7 +97,8 @@ func (s *pgxStore) GetUserByID(ctx context.Context, id int64) (db.GetUserByIDRow
 	return s.queries.GetUserByID(ctx, id)
 }
 
-// Sessions
+// ==================== SESSIONS ====================
+
 func (s *pgxStore) CreateSession(ctx context.Context, id string, userID *int64, expiresAt time.Time) (db.Session, error) {
 	params := db.CreateSessionParams{
 		ID:        id,
@@ -111,7 +116,8 @@ func (s *pgxStore) DeleteSession(ctx context.Context, id string) error {
 	return s.queries.DeleteSession(ctx, id)
 }
 
-// Ratings
+// ==================== RATINGS ====================
+
 func (s *pgxStore) UpsertRating(ctx context.Context, userID, seriesID *int64, rating pgtype.Numeric) (db.Rating, error) {
 	params := db.UpsertRatingParams{
 		UserID:   userID,
@@ -125,7 +131,8 @@ func (s *pgxStore) GetAverageRating(ctx context.Context, seriesID *int64) (float
 	return s.queries.GetAverageRating(ctx, seriesID)
 }
 
-// Comments
+// ==================== COMMENTS ====================
+
 func (s *pgxStore) AddComment(ctx context.Context, userID, seriesID *int64, body string) (db.Comment, error) {
 	params := db.AddCommentParams{
 		UserID:   userID,
@@ -137,8 +144,4 @@ func (s *pgxStore) AddComment(ctx context.Context, userID, seriesID *int64, body
 
 func (s *pgxStore) GetCommentsBySeries(ctx context.Context, seriesID *int64) ([]db.GetCommentsBySeriesRow, error) {
 	return s.queries.GetCommentsBySeries(ctx, seriesID)
-}
-
-func (s *pgxStore) DeleteSessionByToken(ctx context.Context, tokenID string) error {
-	return s.queries.DeleteSession(ctx, tokenID)
 }
