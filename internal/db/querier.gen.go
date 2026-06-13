@@ -17,7 +17,7 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteSession(ctx context.Context, id string) error
 	GetAllCategories(ctx context.Context) ([]Category, error)
-	GetAverageRating(ctx context.Context, seriesID *int64) (interface{}, error)
+	GetAverageRating(ctx context.Context, seriesID *int64) (float64, error)
 	GetCategoryBySlug(ctx context.Context, slug string) (Category, error)
 	GetCommentsBySeries(ctx context.Context, seriesID *int64) ([]GetCommentsBySeriesRow, error)
 	GetEpisodesBySeries(ctx context.Context, seriesID *int64) ([]Episode, error)
