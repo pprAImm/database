@@ -3,8 +3,8 @@ INSERT INTO ratings (user_id, series_id, rating)
 VALUES ($1, $2, $3)
 ON CONFLICT (user_id, series_id)
 DO UPDATE SET rating = $3
-RETURNING *;
+RETURNING id, user_id, series_id, rating, created_at;
 
 -- name: GetAverageRating :one
-SELECT ROUND(AVG(rating)::numeric, 1) as average
+SELECT COALESCE(ROUND(AVG(rating)::numeric, 1), 0) as average
 FROM ratings WHERE series_id = $1;
