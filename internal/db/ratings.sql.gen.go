@@ -12,13 +12,13 @@ import (
 )
 
 const getAverageRating = `-- name: GetAverageRating :one
-SELECT COALESCE(ROUND(AVG(rating)::numeric, 1), 0) as average
+SELECT COALESCE(ROUND(AVG(rating)::numeric, 1), 0)::float as average
 FROM ratings WHERE series_id = $1
 `
 
-func (q *Queries) GetAverageRating(ctx context.Context, seriesID *int64) (interface{}, error) {
+func (q *Queries) GetAverageRating(ctx context.Context, seriesID *int64) (float64, error) {
 	row := q.db.QueryRow(ctx, getAverageRating, seriesID)
-	var average interface{}
+	var average float64
 	err := row.Scan(&average)
 	return average, err
 }

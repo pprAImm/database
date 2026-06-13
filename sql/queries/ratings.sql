@@ -6,5 +6,5 @@ DO UPDATE SET rating = $3
 RETURNING id, user_id, series_id, rating, created_at;
 
 -- name: GetAverageRating :one
-SELECT COALESCE(ROUND(AVG(rating)::numeric, 1), 0) as average
+SELECT COALESCE(ROUND(AVG(rating)::numeric, 1), 0)::float as average
 FROM ratings WHERE series_id = $1;

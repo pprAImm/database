@@ -33,7 +33,7 @@ type Store interface {
 
 	// Ratings
 	UpsertRating(ctx context.Context, userID, seriesID *int64, rating pgtype.Numeric) (db.Rating, error)
-	GetAverageRating(ctx context.Context, seriesID *int64) (pgtype.Numeric, error)
+	GetAverageRating(ctx context.Context, seriesID *int64) (float64, error)
 
 	// Comments
 	AddComment(ctx context.Context, userID, seriesID *int64, body string) (db.Comment, error)
@@ -121,7 +121,7 @@ func (s *pgxStore) UpsertRating(ctx context.Context, userID, seriesID *int64, ra
 	return s.queries.UpsertRating(ctx, params)
 }
 
-func (s *pgxStore) GetAverageRating(ctx context.Context, seriesID *int64) (pgtype.Numeric, error) {
+func (s *pgxStore) GetAverageRating(ctx context.Context, seriesID *int64) (float64, error) {
 	return s.queries.GetAverageRating(ctx, seriesID)
 }
 
