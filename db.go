@@ -17,18 +17,34 @@ func Init() (*pgxpool.Pool, error) {
 		log.Fatal("DATABASE_URL не задан")
 	}
 
-	Pool, err := pgxpool.New(context.Background(), connStr)
+	// Парсим конфиг для настройки пула соединений
+	config, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
-		log.Fatal("Ошибка подключения:", err)
-		return Pool, err
+		log.Fatal("Ошибка парсинга конфига:", err)
+		return nil, err
 	}
 
-	if err = Pool.Ping(context.Background()); err != nil {
+	// Ограничиваем количество соединений
+	//На серверной БД лимит 10 активных подключений на команду
+	//Если каждый сервис откроет по 10 подключений, лимит будет превышен
+	//Ограничиваем до 5, оставляя запас для других сервисов (gateway, streaming-service)
+
+	config.MaxConns = 5
+
+	// Создаём пул с настройками
+	pool, err := pgxpool.NewWithConfig(context.Background(), config)
+	if err != nil {
+		log.Fatal("Ошибка подключения:", err)
+		return nil, err
+	}
+
+	// Проверяем подключение
+	if err = pool.Ping(context.Background()); err != nil {
 		log.Fatal("БД недоступна:", err)
 	}
 
-	log.Println("БД подключена")
-	return Pool, nil
+	log.Println("БД подключена (пул соединений ограничен 5)")
+	return pool, nil
 }
 
 func main() {
