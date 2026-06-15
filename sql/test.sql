@@ -25,6 +25,7 @@ INSERT INTO series (title, description, category_id, cover_url) VALUES
     ('тун тун тун сахур', 'сикас севен', 5, 'https://picsum.photos/300/400?random=3'),
     ('тили тили бом', 'супер страшный сериал', 6, 'https://picsum.photos/300/400?random=4');
 
+-- Вставка эпизодов
 INSERT INTO episodes (series_id, title, tiktok_url, episode_num) VALUES
     (1, 'Пробуждение', 'https://www.tiktok.com/@example/video/1', 1),
     (1, 'Первая битва', 'https://www.tiktok.com/@example/video/2', 2),
