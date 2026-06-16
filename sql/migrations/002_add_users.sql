@@ -1,4 +1,3 @@
--- +goose Up
 CREATE TABLE IF NOT EXISTS users (
     id            BIGSERIAL PRIMARY KEY,
     username      TEXT NOT NULL UNIQUE,
@@ -29,9 +28,3 @@ CREATE TABLE IF NOT EXISTS comments (
     body       TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
--- +goose Down
-DROP TABLE comments;
-DROP TABLE ratings;
-DROP TABLE sessions;
-DROP TABLE users;
