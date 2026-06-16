@@ -15,20 +15,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker image
-        run: docker build -t database:latest .
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/pprAImm/database:latest
 
-      - name: Save Docker image
-        run: docker save database:latest -o database.tar
-
-      - name: Copy to server
-        run: scp -o StrictHostKeyChecking=no database.tar root@185.23.34.25:/root/
-      
       - name: Copy migrations to server
         run: |
           ssh -o StrictHostKeyChecking=no root@185.23.34.25 "mkdir -p /root/migrations"
@@ -37,8 +37,8 @@ jobs:
       - name: Deploy on server
         run: |
           ssh -o StrictHostKeyChecking=no root@185.23.34.25 << 'EOF'
-            docker volume create database_data 2>/dev/null || true
-            docker load -i /root/database.tar
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
+            docker pull ghcr.io/pprAImm/database:latest
             docker stop database || true
             docker rm database || true
             docker run -d \
@@ -47,8 +47,8 @@ jobs:
               -p 5432:5432 \
               -v database_data:/var/lib/postgresql/data \
               --env-file /root/.env \
-              database:latest
-            rm -f /root/database.tar
+              ghcr.io/pprAImm/database:latest
+            docker image prune -f
           EOF
 
       - name: Run migrations
