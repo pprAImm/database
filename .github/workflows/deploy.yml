@@ -1,0 +1,45 @@
+name: Deploy Database
+
+on:
+  push:
+    branches: [main, feature/db2]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Build Docker image
+        run: docker build -t database:latest .
+
+      - name: Save Docker image
+        run: docker save database:latest -o database.tar
+
+      - name: Copy to server
+        run: scp -o StrictHostKeyChecking=no database.tar root@185.23.34.25:/root/
+
+      - name: Deploy on server
+        run: |
+          ssh -o StrictHostKeyChecking=no root@185.23.34.25 << 'EOF'
+            docker load -i /root/database.tar
+            docker stop database || true
+            docker rm database || true
+            docker run -d \
+              --name database \
+              --restart always \
+              -p 5432:5432 \
+              --env-file /root/.env \
+              database:latest
+            rm -f /root/database.tar
+          EOF
