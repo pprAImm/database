@@ -28,10 +28,16 @@ jobs:
 
       - name: Copy to server
         run: scp -o StrictHostKeyChecking=no database.tar root@185.23.34.25:/root/
+      
+      - name: Copy migrations to server
+        run: |
+          ssh -o StrictHostKeyChecking=no root@185.23.34.25 "mkdir -p /root/migrations"
+          scp -o StrictHostKeyChecking=no sql/migrations/*.sql root@185.23.34.25:/root/migrations/
 
       - name: Deploy on server
         run: |
           ssh -o StrictHostKeyChecking=no root@185.23.34.25 << 'EOF'
+            docker volume create database_data 2>/dev/null || true
             docker load -i /root/database.tar
             docker stop database || true
             docker rm database || true
@@ -39,7 +45,16 @@ jobs:
               --name database \
               --restart always \
               -p 5432:5432 \
+              -v database_data:/var/lib/postgresql/data \
               --env-file /root/.env \
               database:latest
             rm -f /root/database.tar
+          EOF
+
+      - name: Run migrations
+        run: |
+          ssh -o StrictHostKeyChecking=no root@185.23.34.25 << 'EOF'
+            sleep 5
+            docker exec -i database psql -U admin -d series < /root/migrations/001_init_schema.sql
+            docker exec -i database psql -U admin -d series < /root/migrations/002_add_users.sql
           EOF
