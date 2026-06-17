@@ -17,6 +17,8 @@ type Store interface {
 	GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]db.GetSeriesByCategoryRow, error)
 	GetSeriesByID(ctx context.Context, id int64) (db.GetSeriesByIDRow, error)
 	SearchSeries(ctx context.Context, query *string) ([]db.SearchSeriesRow, error)
+	CreateSeriesWithUploader(ctx context.Context, title string, description *string, categoryID *int64, coverURL *string, uploadedBy *int64) (db.Series, error)
+	GetSeriesByUser(ctx context.Context, userID *int64) ([]db.GetSeriesByUserRow, error)
 
 	// Episodes
 	GetEpisodesBySeries(ctx context.Context, seriesID *int64) ([]db.Episode, error)
@@ -73,6 +75,21 @@ func (s *pgxStore) GetSeriesByID(ctx context.Context, id int64) (db.GetSeriesByI
 
 func (s *pgxStore) SearchSeries(ctx context.Context, query *string) ([]db.SearchSeriesRow, error) {
 	return s.queries.SearchSeries(ctx, query)
+}
+
+func (s *pgxStore) CreateSeriesWithUploader(ctx context.Context, title string, description *string, categoryID *int64, coverURL *string, uploadedBy *int64) (db.Series, error) {
+	params := db.CreateSeriesWithUploaderParams{
+		Title:       title,
+		Description: description,
+		CategoryID:  categoryID,
+		CoverUrl:    coverURL,
+		UploadedBy:  uploadedBy,
+	}
+	return s.queries.CreateSeriesWithUploader(ctx, params)
+}
+
+func (s *pgxStore) GetSeriesByUser(ctx context.Context, userID *int64) ([]db.GetSeriesByUserRow, error) {
+	return s.queries.GetSeriesByUser(ctx, userID)
 }
 
 // ==================== EPISODES ====================

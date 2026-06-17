@@ -46,6 +46,7 @@ type Series struct {
 	Description *string
 	CategoryID  *int64
 	CoverUrl    *string
+	UploadedBy  *int64
 }
 
 type Session struct {
