@@ -25,6 +25,9 @@ type Store interface {
 	CreateUser(ctx context.Context, username, email, passwordHash string) (db.CreateUserRow, error)
 	GetUserByEmail(ctx context.Context, email string) (db.GetUserByEmailRow, error)
 	GetUserByID(ctx context.Context, id int64) (db.GetUserByIDRow, error)
+	GetUserByIDWithPassword(ctx context.Context, id int64) (db.GetUserByIDWithPasswordRow, error)
+	UpdateUsername(ctx context.Context, id int64, username string) (db.UpdateUsernameRow, error)
+	UpdatePassword(ctx context.Context, id int64, passwordHash string) error
 
 	// Sessions
 	CreateSession(ctx context.Context, id string, userID *int64, expiresAt time.Time) (db.Session, error)
@@ -95,6 +98,26 @@ func (s *pgxStore) GetUserByEmail(ctx context.Context, email string) (db.GetUser
 
 func (s *pgxStore) GetUserByID(ctx context.Context, id int64) (db.GetUserByIDRow, error) {
 	return s.queries.GetUserByID(ctx, id)
+}
+
+func (s *pgxStore) GetUserByIDWithPassword(ctx context.Context, id int64) (db.GetUserByIDWithPasswordRow, error) {
+	return s.queries.GetUserByIDWithPassword(ctx, id)
+}
+
+func (s *pgxStore) UpdateUsername(ctx context.Context, id int64, username string) (db.UpdateUsernameRow, error) {
+	params := db.UpdateUsernameParams{
+		ID:       id,
+		Username: username,
+	}
+	return s.queries.UpdateUsername(ctx, params)
+}
+
+func (s *pgxStore) UpdatePassword(ctx context.Context, id int64, passwordHash string) error {
+	params := db.UpdatePasswordParams{
+		ID:           id,
+		PasswordHash: passwordHash,
+	}
+	return s.queries.UpdatePassword(ctx, params)
 }
 
 // ==================== SESSIONS ====================

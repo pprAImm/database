@@ -26,7 +26,10 @@ type Querier interface {
 	GetSession(ctx context.Context, id string) (Session, error)
 	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
 	GetUserByID(ctx context.Context, id int64) (GetUserByIDRow, error)
+	GetUserByIDWithPassword(ctx context.Context, id int64) (GetUserByIDWithPasswordRow, error)
 	SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchSeriesRow, error)
+	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error
+	UpdateUsername(ctx context.Context, arg UpdateUsernameParams) (UpdateUsernameRow, error)
 	UpsertRating(ctx context.Context, arg UpsertRatingParams) (Rating, error)
 }
 
