@@ -18,10 +18,13 @@ type Store interface {
 	GetSeriesByID(ctx context.Context, id int64) (db.GetSeriesByIDRow, error)
 	SearchSeries(ctx context.Context, query *string) ([]db.SearchSeriesRow, error)
 	CreateSeriesWithUploader(ctx context.Context, title string, description *string, categoryID *int64, coverURL *string, uploadedBy *int64) (db.Series, error)
+	UpdateSeries(ctx context.Context, id int64, title string, description *string, categoryID *int64, coverURL *string) (db.Series, error)
 	GetSeriesByUser(ctx context.Context, userID *int64) ([]db.GetSeriesByUserRow, error)
 
 	// Episodes
 	GetEpisodesBySeries(ctx context.Context, seriesID *int64) ([]db.Episode, error)
+	GetEpisodeByID(ctx context.Context, id int64) (db.Episode, error)
+	DeleteEpisode(ctx context.Context, id int64) (db.Episode, error)
 
 	// Users
 	CreateUser(ctx context.Context, username, email, passwordHash string) (db.CreateUserRow, error)
@@ -88,6 +91,17 @@ func (s *pgxStore) CreateSeriesWithUploader(ctx context.Context, title string, d
 	return s.queries.CreateSeriesWithUploader(ctx, params)
 }
 
+func (s *pgxStore) UpdateSeries(ctx context.Context, id int64, title string, description *string, categoryID *int64, coverURL *string) (db.Series, error) {
+	params := db.UpdateSeriesParams{
+		ID:          id,
+		Title:       title,
+		Description: description,
+		CategoryID:  categoryID,
+		CoverUrl:    coverURL,
+	}
+	return s.queries.UpdateSeries(ctx, params)
+}
+
 func (s *pgxStore) GetSeriesByUser(ctx context.Context, userID *int64) ([]db.GetSeriesByUserRow, error) {
 	return s.queries.GetSeriesByUser(ctx, userID)
 }
@@ -96,6 +110,14 @@ func (s *pgxStore) GetSeriesByUser(ctx context.Context, userID *int64) ([]db.Get
 
 func (s *pgxStore) GetEpisodesBySeries(ctx context.Context, seriesID *int64) ([]db.Episode, error) {
 	return s.queries.GetEpisodesBySeries(ctx, seriesID)
+}
+
+func (s *pgxStore) GetEpisodeByID(ctx context.Context, id int64) (db.Episode, error) {
+	return s.queries.GetEpisodeByID(ctx, id)
+}
+
+func (s *pgxStore) DeleteEpisode(ctx context.Context, id int64) (db.Episode, error) {
+	return s.queries.DeleteEpisode(ctx, id)
 }
 
 // ==================== USERS ====================

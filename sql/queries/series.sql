@@ -4,9 +4,18 @@ FROM series
 WHERE category_id = $1;
 
 -- name: GetSeriesByID :one
-SELECT id, title, description, cover_url
+SELECT id, title, description, cover_url, uploaded_by
 FROM series
 WHERE id = $1;
+
+-- name: UpdateSeries :one
+UPDATE series
+SET title = $2,
+    description = $3,
+    category_id = $4,
+    cover_url = $5
+WHERE id = $1
+RETURNING *;
 
 -- name: SearchSeries :many
 SELECT id, title, description, cover_url

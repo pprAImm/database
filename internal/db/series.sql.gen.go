@@ -114,7 +114,7 @@ func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([
 }
 
 const getSeriesByID = `-- name: GetSeriesByID :one
-SELECT id, title, description, cover_url
+SELECT id, title, description, cover_url, uploaded_by
 FROM series
 WHERE id = $1
 `
@@ -124,6 +124,7 @@ type GetSeriesByIDRow struct {
 	Title       string
 	Description *string
 	CoverUrl    *string
+	UploadedBy  *int64
 }
 
 func (q *Queries) GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow, error) {
@@ -134,6 +135,7 @@ func (q *Queries) GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow
 		&i.Title,
 		&i.Description,
 		&i.CoverUrl,
+		&i.UploadedBy,
 	)
 	return i, err
 }
@@ -212,4 +214,42 @@ func (q *Queries) SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchS
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateSeries = `-- name: UpdateSeries :one
+UPDATE series
+SET title = $2,
+    description = $3,
+    category_id = $4,
+    cover_url = $5
+WHERE id = $1
+RETURNING id, title, description, category_id, cover_url, uploaded_by
+`
+
+type UpdateSeriesParams struct {
+	ID          int64
+	Title       string
+	Description *string
+	CategoryID  *int64
+	CoverUrl    *string
+}
+
+func (q *Queries) UpdateSeries(ctx context.Context, arg UpdateSeriesParams) (Series, error) {
+	row := q.db.QueryRow(ctx, updateSeries,
+		arg.ID,
+		arg.Title,
+		arg.Description,
+		arg.CategoryID,
+		arg.CoverUrl,
+	)
+	var i Series
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.CategoryID,
+		&i.CoverUrl,
+		&i.UploadedBy,
+	)
+	return i, err
 }
