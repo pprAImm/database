@@ -16,11 +16,13 @@ type Querier interface {
 	CreateSeriesWithUploader(ctx context.Context, arg CreateSeriesWithUploaderParams) (Series, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	DeleteEpisode(ctx context.Context, id int64) (Episode, error)
 	DeleteSession(ctx context.Context, id string) error
 	GetAllCategories(ctx context.Context) ([]Category, error)
 	GetAverageRating(ctx context.Context, seriesID *int64) (float64, error)
 	GetCategoryBySlug(ctx context.Context, slug string) (Category, error)
 	GetCommentsBySeries(ctx context.Context, seriesID *int64) ([]GetCommentsBySeriesRow, error)
+	GetEpisodeByID(ctx context.Context, id int64) (Episode, error)
 	GetEpisodesBySeries(ctx context.Context, seriesID *int64) ([]Episode, error)
 	GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]GetSeriesByCategoryRow, error)
 	GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow, error)
@@ -31,6 +33,7 @@ type Querier interface {
 	GetUserByIDWithPassword(ctx context.Context, id int64) (GetUserByIDWithPasswordRow, error)
 	SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchSeriesRow, error)
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error
+	UpdateSeries(ctx context.Context, arg UpdateSeriesParams) (Series, error)
 	UpdateUsername(ctx context.Context, arg UpdateUsernameParams) (UpdateUsernameRow, error)
 	UpsertRating(ctx context.Context, arg UpsertRatingParams) (Rating, error)
 }
