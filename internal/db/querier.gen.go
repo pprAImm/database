@@ -17,6 +17,7 @@ type Querier interface {
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteEpisode(ctx context.Context, id int64) (Episode, error)
+	DeleteSeries(ctx context.Context, id int64) (Series, error)
 	DeleteSession(ctx context.Context, id string) error
 	GetAllCategories(ctx context.Context) ([]Category, error)
 	GetAverageRating(ctx context.Context, seriesID *int64) (float64, error)

@@ -36,3 +36,7 @@ RETURNING *;
 SELECT id, title, description, cover_url
 FROM series
 WHERE uploaded_by = $1;
+
+-- name: DeleteSeries :one
+DELETE FROM series WHERE id = $1
+RETURNING *;

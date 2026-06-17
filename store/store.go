@@ -19,6 +19,7 @@ type Store interface {
 	SearchSeries(ctx context.Context, query *string) ([]db.SearchSeriesRow, error)
 	CreateSeriesWithUploader(ctx context.Context, title string, description *string, categoryID *int64, coverURL *string, uploadedBy *int64) (db.Series, error)
 	UpdateSeries(ctx context.Context, id int64, title string, description *string, categoryID *int64, coverURL *string) (db.Series, error)
+	DeleteSeries(ctx context.Context, id int64) (db.Series, error)
 	GetSeriesByUser(ctx context.Context, userID *int64) ([]db.GetSeriesByUserRow, error)
 
 	// Episodes
@@ -100,6 +101,10 @@ func (s *pgxStore) UpdateSeries(ctx context.Context, id int64, title string, des
 		CoverUrl:    coverURL,
 	}
 	return s.queries.UpdateSeries(ctx, params)
+}
+
+func (s *pgxStore) DeleteSeries(ctx context.Context, id int64) (db.Series, error) {
+	return s.queries.DeleteSeries(ctx, id)
 }
 
 func (s *pgxStore) GetSeriesByUser(ctx context.Context, userID *int64) ([]db.GetSeriesByUserRow, error) {

@@ -75,6 +75,25 @@ func (q *Queries) CreateSeriesWithUploader(ctx context.Context, arg CreateSeries
 	return i, err
 }
 
+const deleteSeries = `-- name: DeleteSeries :one
+DELETE FROM series WHERE id = $1
+RETURNING id, title, description, category_id, cover_url, uploaded_by
+`
+
+func (q *Queries) DeleteSeries(ctx context.Context, id int64) (Series, error) {
+	row := q.db.QueryRow(ctx, deleteSeries, id)
+	var i Series
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.CategoryID,
+		&i.CoverUrl,
+		&i.UploadedBy,
+	)
+	return i, err
+}
+
 const getSeriesByCategory = `-- name: GetSeriesByCategory :many
 SELECT id, title, description, cover_url
 FROM series
