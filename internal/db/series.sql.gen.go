@@ -12,7 +12,7 @@ import (
 const createSeries = `-- name: CreateSeries :one
 INSERT INTO series (title, description, category_id, cover_url)
 VALUES ($1, $2, $3, $4)
-RETURNING id, title, description, category_id, cover_url
+RETURNING id, title, description, category_id, cover_url, uploaded_by
 `
 
 type CreateSeriesParams struct {
@@ -36,6 +36,41 @@ func (q *Queries) CreateSeries(ctx context.Context, arg CreateSeriesParams) (Ser
 		&i.Description,
 		&i.CategoryID,
 		&i.CoverUrl,
+		&i.UploadedBy,
+	)
+	return i, err
+}
+
+const createSeriesWithUploader = `-- name: CreateSeriesWithUploader :one
+INSERT INTO series (title, description, category_id, cover_url, uploaded_by)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, title, description, category_id, cover_url, uploaded_by
+`
+
+type CreateSeriesWithUploaderParams struct {
+	Title       string
+	Description *string
+	CategoryID  *int64
+	CoverUrl    *string
+	UploadedBy  *int64
+}
+
+func (q *Queries) CreateSeriesWithUploader(ctx context.Context, arg CreateSeriesWithUploaderParams) (Series, error) {
+	row := q.db.QueryRow(ctx, createSeriesWithUploader,
+		arg.Title,
+		arg.Description,
+		arg.CategoryID,
+		arg.CoverUrl,
+		arg.UploadedBy,
+	)
+	var i Series
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.CategoryID,
+		&i.CoverUrl,
+		&i.UploadedBy,
 	)
 	return i, err
 }
@@ -101,6 +136,44 @@ func (q *Queries) GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow
 		&i.CoverUrl,
 	)
 	return i, err
+}
+
+const getSeriesByUser = `-- name: GetSeriesByUser :many
+SELECT id, title, description, cover_url
+FROM series
+WHERE uploaded_by = $1
+`
+
+type GetSeriesByUserRow struct {
+	ID          int64
+	Title       string
+	Description *string
+	CoverUrl    *string
+}
+
+func (q *Queries) GetSeriesByUser(ctx context.Context, uploadedBy *int64) ([]GetSeriesByUserRow, error) {
+	rows, err := q.db.Query(ctx, getSeriesByUser, uploadedBy)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSeriesByUserRow
+	for rows.Next() {
+		var i GetSeriesByUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.CoverUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const searchSeries = `-- name: SearchSeries :many

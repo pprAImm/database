@@ -13,6 +13,7 @@ type Querier interface {
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (Episode, error)
 	CreateSeries(ctx context.Context, arg CreateSeriesParams) (Series, error)
+	CreateSeriesWithUploader(ctx context.Context, arg CreateSeriesWithUploaderParams) (Series, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteSession(ctx context.Context, id string) error
@@ -23,6 +24,7 @@ type Querier interface {
 	GetEpisodesBySeries(ctx context.Context, seriesID *int64) ([]Episode, error)
 	GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]GetSeriesByCategoryRow, error)
 	GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow, error)
+	GetSeriesByUser(ctx context.Context, uploadedBy *int64) ([]GetSeriesByUserRow, error)
 	GetSession(ctx context.Context, id string) (Session, error)
 	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
 	GetUserByID(ctx context.Context, id int64) (GetUserByIDRow, error)
