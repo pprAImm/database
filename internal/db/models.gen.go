@@ -46,6 +46,7 @@ type Series struct {
 	Description *string
 	CategoryID  *int64
 	CoverUrl    *string
+	UploadedBy  *int64
 }
 
 type Session struct {
@@ -55,9 +56,11 @@ type Session struct {
 }
 
 type User struct {
-	ID           int64
-	Username     string
-	Email        string
-	PasswordHash string
-	CreatedAt    time.Time
+	ID                 int64
+	Username           string
+	Email              string
+	PasswordHash       string
+	EmailVerified      bool
+	VerificationToken  *string
+	CreatedAt          time.Time
 }

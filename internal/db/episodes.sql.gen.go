@@ -40,6 +40,43 @@ func (q *Queries) CreateEpisode(ctx context.Context, arg CreateEpisodeParams) (E
 	return i, err
 }
 
+const deleteEpisode = `-- name: DeleteEpisode :one
+DELETE FROM episodes WHERE id = $1
+RETURNING id, series_id, title, tiktok_url, episode_num
+`
+
+func (q *Queries) DeleteEpisode(ctx context.Context, id int64) (Episode, error) {
+	row := q.db.QueryRow(ctx, deleteEpisode, id)
+	var i Episode
+	err := row.Scan(
+		&i.ID,
+		&i.SeriesID,
+		&i.Title,
+		&i.TiktokUrl,
+		&i.EpisodeNum,
+	)
+	return i, err
+}
+
+const getEpisodeByID = `-- name: GetEpisodeByID :one
+SELECT id, series_id, title, tiktok_url, episode_num
+FROM episodes
+WHERE id = $1
+`
+
+func (q *Queries) GetEpisodeByID(ctx context.Context, id int64) (Episode, error) {
+	row := q.db.QueryRow(ctx, getEpisodeByID, id)
+	var i Episode
+	err := row.Scan(
+		&i.ID,
+		&i.SeriesID,
+		&i.Title,
+		&i.TiktokUrl,
+		&i.EpisodeNum,
+	)
+	return i, err
+}
+
 const getEpisodesBySeries = `-- name: GetEpisodesBySeries :many
 SELECT id, series_id, title, tiktok_url, episode_num
 FROM episodes

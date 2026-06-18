@@ -8,3 +8,12 @@ ORDER BY episode_num;
 INSERT INTO episodes (series_id, title, tiktok_url, episode_num)
 VALUES ($1, $2, $3, $4)
 RETURNING *;
+
+-- name: GetEpisodeByID :one
+SELECT id, series_id, title, tiktok_url, episode_num
+FROM episodes
+WHERE id = $1;
+
+-- name: DeleteEpisode :one
+DELETE FROM episodes WHERE id = $1
+RETURNING id, series_id, title, tiktok_url, episode_num;

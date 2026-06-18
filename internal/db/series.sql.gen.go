@@ -12,7 +12,7 @@ import (
 const createSeries = `-- name: CreateSeries :one
 INSERT INTO series (title, description, category_id, cover_url)
 VALUES ($1, $2, $3, $4)
-RETURNING id, title, description, category_id, cover_url
+RETURNING id, title, description, category_id, cover_url, uploaded_by
 `
 
 type CreateSeriesParams struct {
@@ -36,6 +36,60 @@ func (q *Queries) CreateSeries(ctx context.Context, arg CreateSeriesParams) (Ser
 		&i.Description,
 		&i.CategoryID,
 		&i.CoverUrl,
+		&i.UploadedBy,
+	)
+	return i, err
+}
+
+const createSeriesWithUploader = `-- name: CreateSeriesWithUploader :one
+INSERT INTO series (title, description, category_id, cover_url, uploaded_by)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, title, description, category_id, cover_url, uploaded_by
+`
+
+type CreateSeriesWithUploaderParams struct {
+	Title       string
+	Description *string
+	CategoryID  *int64
+	CoverUrl    *string
+	UploadedBy  *int64
+}
+
+func (q *Queries) CreateSeriesWithUploader(ctx context.Context, arg CreateSeriesWithUploaderParams) (Series, error) {
+	row := q.db.QueryRow(ctx, createSeriesWithUploader,
+		arg.Title,
+		arg.Description,
+		arg.CategoryID,
+		arg.CoverUrl,
+		arg.UploadedBy,
+	)
+	var i Series
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.CategoryID,
+		&i.CoverUrl,
+		&i.UploadedBy,
+	)
+	return i, err
+}
+
+const deleteSeries = `-- name: DeleteSeries :one
+DELETE FROM series WHERE id = $1
+RETURNING id, title, description, category_id, cover_url, uploaded_by
+`
+
+func (q *Queries) DeleteSeries(ctx context.Context, id int64) (Series, error) {
+	row := q.db.QueryRow(ctx, deleteSeries, id)
+	var i Series
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.CategoryID,
+		&i.CoverUrl,
+		&i.UploadedBy,
 	)
 	return i, err
 }
@@ -79,7 +133,7 @@ func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([
 }
 
 const getSeriesByID = `-- name: GetSeriesByID :one
-SELECT id, title, description, cover_url
+SELECT id, title, description, cover_url, uploaded_by
 FROM series
 WHERE id = $1
 `
@@ -89,6 +143,7 @@ type GetSeriesByIDRow struct {
 	Title       string
 	Description *string
 	CoverUrl    *string
+	UploadedBy  *int64
 }
 
 func (q *Queries) GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow, error) {
@@ -99,8 +154,47 @@ func (q *Queries) GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow
 		&i.Title,
 		&i.Description,
 		&i.CoverUrl,
+		&i.UploadedBy,
 	)
 	return i, err
+}
+
+const getSeriesByUser = `-- name: GetSeriesByUser :many
+SELECT id, title, description, cover_url
+FROM series
+WHERE uploaded_by = $1
+`
+
+type GetSeriesByUserRow struct {
+	ID          int64
+	Title       string
+	Description *string
+	CoverUrl    *string
+}
+
+func (q *Queries) GetSeriesByUser(ctx context.Context, uploadedBy *int64) ([]GetSeriesByUserRow, error) {
+	rows, err := q.db.Query(ctx, getSeriesByUser, uploadedBy)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSeriesByUserRow
+	for rows.Next() {
+		var i GetSeriesByUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.CoverUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const searchSeries = `-- name: SearchSeries :many
@@ -139,4 +233,42 @@ func (q *Queries) SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchS
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateSeries = `-- name: UpdateSeries :one
+UPDATE series
+SET title = $2,
+    description = $3,
+    category_id = $4,
+    cover_url = $5
+WHERE id = $1
+RETURNING id, title, description, category_id, cover_url, uploaded_by
+`
+
+type UpdateSeriesParams struct {
+	ID          int64
+	Title       string
+	Description *string
+	CategoryID  *int64
+	CoverUrl    *string
+}
+
+func (q *Queries) UpdateSeries(ctx context.Context, arg UpdateSeriesParams) (Series, error) {
+	row := q.db.QueryRow(ctx, updateSeries,
+		arg.ID,
+		arg.Title,
+		arg.Description,
+		arg.CategoryID,
+		arg.CoverUrl,
+	)
+	var i Series
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.CategoryID,
+		&i.CoverUrl,
+		&i.UploadedBy,
+	)
+	return i, err
 }
