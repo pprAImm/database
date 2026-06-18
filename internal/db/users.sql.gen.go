@@ -141,4 +141,82 @@ func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) 
 	var i UpdateUsernameRow
 	err := row.Scan(&i.ID, &i.Username, &i.Email)
 	return i, err
+
+const createUserWithVerificationToken = `-- name: CreateUserWithVerificationToken :one
+INSERT INTO users (username, email, password_hash, verification_token)
+VALUES ($1, $2, $3, $4)
+RETURNING id, username, email, created_at
+`
+
+type CreateUserWithVerificationTokenParams struct {
+	Username           string
+	Email              string
+	PasswordHash       string
+	VerificationToken  *string
+}
+
+type CreateUserWithVerificationTokenRow struct {
+	ID        int64
+	Username  string
+	Email     string
+	CreatedAt time.Time
+}
+
+func (q *Queries) CreateUserWithVerificationToken(ctx context.Context, arg CreateUserWithVerificationTokenParams) (CreateUserWithVerificationTokenRow, error) {
+	row := q.db.QueryRow(ctx, createUserWithVerificationToken, arg.Username, arg.Email, arg.PasswordHash, arg.VerificationToken)
+	var i CreateUserWithVerificationTokenRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getUserByVerificationToken = `-- name: GetUserByVerificationToken :one
+SELECT id, username, email, email_verified
+FROM users WHERE verification_token = $1
+`
+
+type GetUserByVerificationTokenRow struct {
+	ID             int64
+	Username       string
+	Email          string
+	EmailVerified  bool
+}
+
+func (q *Queries) GetUserByVerificationToken(ctx context.Context, verificationToken string) (GetUserByVerificationTokenRow, error) {
+	row := q.db.QueryRow(ctx, getUserByVerificationToken, verificationToken)
+	var i GetUserByVerificationTokenRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.EmailVerified,
+	)
+	return i, err
+}
+
+const verifyEmail = `-- name: VerifyEmail :exec
+UPDATE users SET email_verified = true, verification_token = NULL
+WHERE verification_token = $1
+`
+
+func (q *Queries) VerifyEmail(ctx context.Context, verificationToken string) error {
+	_, err := q.db.Exec(ctx, verifyEmail, verificationToken)
+	return err
+}
+
+const getUserEmailVerified = `-- name: GetUserEmailVerified :one
+SELECT email_verified FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUserEmailVerified(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, getUserEmailVerified, id)
+	var email_verified bool
+	err := row.Scan(&email_verified)
+	return email_verified, err
+}
+
 }

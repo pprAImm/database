@@ -35,6 +35,11 @@ type Store interface {
 	UpdateUsername(ctx context.Context, id int64, username string) (db.UpdateUsernameRow, error)
 	UpdatePassword(ctx context.Context, id int64, passwordHash string) error
 
+	// Email verification
+	GetUserByVerificationToken(ctx context.Context, token string) (db.GetUserByVerificationTokenRow, error)
+	VerifyEmail(ctx context.Context, token string) error
+	GetUserEmailVerified(ctx context.Context, id int64) (bool, error)
+
 	// Sessions
 	CreateSession(ctx context.Context, id string, userID *int64, expiresAt time.Time) (db.Session, error)
 	GetSession(ctx context.Context, id string) (db.Session, error)
@@ -136,6 +141,16 @@ func (s *pgxStore) CreateUser(ctx context.Context, username, email, passwordHash
 	return s.queries.CreateUser(ctx, params)
 }
 
+func (s *pgxStore) CreateUserWithVerificationToken(ctx context.Context, username, email, passwordHash string, verificationToken *string) (db.CreateUserWithVerificationTokenRow, error) {
+	params := db.CreateUserWithVerificationTokenParams{
+		Username:           username,
+		Email:              email,
+		PasswordHash:       passwordHash,
+		VerificationToken:  verificationToken,
+	}
+	return s.queries.CreateUserWithVerificationToken(ctx, params)
+}
+
 func (s *pgxStore) GetUserByEmail(ctx context.Context, email string) (db.GetUserByEmailRow, error) {
 	return s.queries.GetUserByEmail(ctx, email)
 }
@@ -162,6 +177,20 @@ func (s *pgxStore) UpdatePassword(ctx context.Context, id int64, passwordHash st
 		PasswordHash: passwordHash,
 	}
 	return s.queries.UpdatePassword(ctx, params)
+}
+
+// ==================== EMAIL VERIFICATION ====================
+
+func (s *pgxStore) GetUserByVerificationToken(ctx context.Context, token string) (db.GetUserByVerificationTokenRow, error) {
+	return s.queries.GetUserByVerificationToken(ctx, token)
+}
+
+func (s *pgxStore) VerifyEmail(ctx context.Context, token string) error {
+	return s.queries.VerifyEmail(ctx, token)
+}
+
+func (s *pgxStore) GetUserEmailVerified(ctx context.Context, id int64) (bool, error) {
+	return s.queries.GetUserEmailVerified(ctx, id)
 }
 
 // ==================== SESSIONS ====================
