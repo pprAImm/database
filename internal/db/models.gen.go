@@ -62,3 +62,12 @@ type User struct {
 	PasswordHash string
 	CreatedAt    time.Time
 }
+
+type WatchProgress struct {
+	UserID          int64
+	EpisodeID       int64
+	ProgressSeconds float64
+	DurationSeconds float64
+	Completed       bool
+	UpdatedAt       time.Time
+}

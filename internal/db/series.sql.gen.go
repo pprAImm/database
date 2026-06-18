@@ -197,6 +197,102 @@ func (q *Queries) GetSeriesByUser(ctx context.Context, uploadedBy *int64) ([]Get
 	return items, nil
 }
 
+const listNewSeries = `-- name: ListNewSeries :many
+SELECT s.id, s.title, s.description, s.cover_url,
+       COALESCE(AVG(r.rating), 0)::float8 as average_rating,
+       COUNT(r.id)::bigint as vote_count
+FROM series s
+LEFT JOIN ratings r ON r.series_id = s.id
+GROUP BY s.id
+ORDER BY s.id DESC
+LIMIT $1
+`
+
+type ListNewSeriesRow struct {
+	ID            int64
+	Title         string
+	Description   *string
+	CoverUrl      *string
+	AverageRating float64
+	VoteCount     int64
+}
+
+func (q *Queries) ListNewSeries(ctx context.Context, limit int32) ([]ListNewSeriesRow, error) {
+	rows, err := q.db.Query(ctx, listNewSeries, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListNewSeriesRow
+	for rows.Next() {
+		var i ListNewSeriesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.CoverUrl,
+			&i.AverageRating,
+			&i.VoteCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPopularSeries = `-- name: ListPopularSeries :many
+SELECT s.id, s.title, s.description, s.cover_url,
+       COALESCE(AVG(r.rating), 0)::float8 as average_rating,
+       COUNT(r.id)::bigint as vote_count
+FROM series s
+LEFT JOIN ratings r ON r.series_id = s.id
+GROUP BY s.id
+ORDER BY
+  (COALESCE(AVG(r.rating), 0)::float8 * COUNT(r.id)::float8)
+  / (COUNT(r.id)::float8 + 10) DESC
+LIMIT $1
+`
+
+type ListPopularSeriesRow struct {
+	ID            int64
+	Title         string
+	Description   *string
+	CoverUrl      *string
+	AverageRating float64
+	VoteCount     int64
+}
+
+func (q *Queries) ListPopularSeries(ctx context.Context, limit int32) ([]ListPopularSeriesRow, error) {
+	rows, err := q.db.Query(ctx, listPopularSeries, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPopularSeriesRow
+	for rows.Next() {
+		var i ListPopularSeriesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.CoverUrl,
+			&i.AverageRating,
+			&i.VoteCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const searchSeries = `-- name: SearchSeries :many
 SELECT id, title, description, cover_url
 FROM series

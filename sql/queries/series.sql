@@ -40,3 +40,25 @@ WHERE uploaded_by = $1;
 -- name: DeleteSeries :one
 DELETE FROM series WHERE id = $1
 RETURNING *;
+
+-- name: ListPopularSeries :many
+SELECT s.id, s.title, s.description, s.cover_url,
+       COALESCE(AVG(r.rating), 0)::float8 as average_rating,
+       COUNT(r.id)::bigint as vote_count
+FROM series s
+LEFT JOIN ratings r ON r.series_id = s.id
+GROUP BY s.id
+ORDER BY
+  (COALESCE(AVG(r.rating), 0)::float8 * COUNT(r.id)::float8)
+  / (COUNT(r.id)::float8 + 10) DESC
+LIMIT $1;
+
+-- name: ListNewSeries :many
+SELECT s.id, s.title, s.description, s.cover_url,
+       COALESCE(AVG(r.rating), 0)::float8 as average_rating,
+       COUNT(r.id)::bigint as vote_count
+FROM series s
+LEFT JOIN ratings r ON r.series_id = s.id
+GROUP BY s.id
+ORDER BY s.id DESC
+LIMIT $1;

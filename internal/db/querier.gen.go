@@ -32,11 +32,16 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
 	GetUserByID(ctx context.Context, id int64) (GetUserByIDRow, error)
 	GetUserByIDWithPassword(ctx context.Context, id int64) (GetUserByIDWithPasswordRow, error)
+	GetWatchProgress(ctx context.Context, arg GetWatchProgressParams) (WatchProgress, error)
+	GetWatchProgressBySeries(ctx context.Context, arg GetWatchProgressBySeriesParams) ([]WatchProgress, error)
+	ListNewSeries(ctx context.Context, limit int32) ([]ListNewSeriesRow, error)
+	ListPopularSeries(ctx context.Context, limit int32) ([]ListPopularSeriesRow, error)
 	SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchSeriesRow, error)
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error
 	UpdateSeries(ctx context.Context, arg UpdateSeriesParams) (Series, error)
 	UpdateUsername(ctx context.Context, arg UpdateUsernameParams) (UpdateUsernameRow, error)
 	UpsertRating(ctx context.Context, arg UpsertRatingParams) (Rating, error)
+	UpsertWatchProgress(ctx context.Context, arg UpsertWatchProgressParams) (WatchProgress, error)
 }
 
 var _ Querier = (*Queries)(nil)

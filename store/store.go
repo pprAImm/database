@@ -17,6 +17,8 @@ type Store interface {
 	GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]db.GetSeriesByCategoryRow, error)
 	GetSeriesByID(ctx context.Context, id int64) (db.GetSeriesByIDRow, error)
 	SearchSeries(ctx context.Context, query *string) ([]db.SearchSeriesRow, error)
+	ListPopularSeries(ctx context.Context, limit int32) ([]db.ListPopularSeriesRow, error)
+	ListNewSeries(ctx context.Context, limit int32) ([]db.ListNewSeriesRow, error)
 	CreateSeriesWithUploader(ctx context.Context, title string, description *string, categoryID *int64, coverURL *string, uploadedBy *int64) (db.Series, error)
 	UpdateSeries(ctx context.Context, id int64, title string, description *string, categoryID *int64, coverURL *string) (db.Series, error)
 	DeleteSeries(ctx context.Context, id int64) (db.Series, error)
@@ -47,6 +49,11 @@ type Store interface {
 	// Comments
 	AddComment(ctx context.Context, userID, seriesID *int64, body string) (db.Comment, error)
 	GetCommentsBySeries(ctx context.Context, seriesID *int64) ([]db.GetCommentsBySeriesRow, error)
+
+	// Watch Progress
+	UpsertWatchProgress(ctx context.Context, userID, episodeID int64, progressSeconds, durationSeconds float64, completed bool) (db.WatchProgress, error)
+	GetWatchProgress(ctx context.Context, userID, episodeID int64) (*db.WatchProgress, error)
+	GetWatchProgressBySeries(ctx context.Context, userID, seriesID int64) ([]db.WatchProgress, error)
 }
 
 type pgxStore struct {
@@ -79,6 +86,14 @@ func (s *pgxStore) GetSeriesByID(ctx context.Context, id int64) (db.GetSeriesByI
 
 func (s *pgxStore) SearchSeries(ctx context.Context, query *string) ([]db.SearchSeriesRow, error) {
 	return s.queries.SearchSeries(ctx, query)
+}
+
+func (s *pgxStore) ListPopularSeries(ctx context.Context, limit int32) ([]db.ListPopularSeriesRow, error) {
+	return s.queries.ListPopularSeries(ctx, limit)
+}
+
+func (s *pgxStore) ListNewSeries(ctx context.Context, limit int32) ([]db.ListNewSeriesRow, error) {
+	return s.queries.ListNewSeries(ctx, limit)
 }
 
 func (s *pgxStore) CreateSeriesWithUploader(ctx context.Context, title string, description *string, categoryID *int64, coverURL *string, uploadedBy *int64) (db.Series, error) {
@@ -211,4 +226,35 @@ func (s *pgxStore) AddComment(ctx context.Context, userID, seriesID *int64, body
 
 func (s *pgxStore) GetCommentsBySeries(ctx context.Context, seriesID *int64) ([]db.GetCommentsBySeriesRow, error) {
 	return s.queries.GetCommentsBySeries(ctx, seriesID)
+}
+
+// ==================== WATCH PROGRESS ====================
+
+func (s *pgxStore) UpsertWatchProgress(ctx context.Context, userID, episodeID int64, progressSeconds, durationSeconds float64, completed bool) (db.WatchProgress, error) {
+	params := db.UpsertWatchProgressParams{
+		UserID:          userID,
+		EpisodeID:       episodeID,
+		ProgressSeconds: progressSeconds,
+		DurationSeconds: durationSeconds,
+		Completed:       completed,
+	}
+	return s.queries.UpsertWatchProgress(ctx, params)
+}
+
+func (s *pgxStore) GetWatchProgress(ctx context.Context, userID, episodeID int64) (*db.WatchProgress, error) {
+	result, err := s.queries.GetWatchProgress(ctx, db.GetWatchProgressParams{
+		UserID:    userID,
+		EpisodeID: episodeID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (s *pgxStore) GetWatchProgressBySeries(ctx context.Context, userID, seriesID int64) ([]db.WatchProgress, error) {
+	return s.queries.GetWatchProgressBySeries(ctx, db.GetWatchProgressBySeriesParams{
+		UserID:   userID,
+		SeriesID: &seriesID,
+	})
 }
