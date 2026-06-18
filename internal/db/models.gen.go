@@ -56,11 +56,12 @@ type Session struct {
 }
 
 type User struct {
-	ID                 int64
-	Username           string
-	Email              string
-	PasswordHash       string
-	EmailVerified      bool
-	VerificationToken  *string
-	CreatedAt          time.Time
+	ID                         int64
+	Username                   string
+	Email                      string
+	PasswordHash               string
+	CreatedAt                  time.Time
+	EmailVerified              bool
+	VerificationToken          *string
+	VerificationTokenExpiresAt *time.Time
 }
