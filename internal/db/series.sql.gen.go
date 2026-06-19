@@ -95,7 +95,7 @@ func (q *Queries) DeleteSeries(ctx context.Context, id int64) (Series, error) {
 }
 
 const getSeriesByCategory = `-- name: GetSeriesByCategory :many
-SELECT id, title, description, cover_url
+SELECT id, title, description, cover_url, category_id
 FROM series
 WHERE category_id = $1
 `
@@ -105,6 +105,7 @@ type GetSeriesByCategoryRow struct {
 	Title       string
 	Description *string
 	CoverUrl    *string
+	CategoryID  *int64
 }
 
 func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]GetSeriesByCategoryRow, error) {
@@ -121,6 +122,7 @@ func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([
 			&i.Title,
 			&i.Description,
 			&i.CoverUrl,
+			&i.CategoryID,
 		); err != nil {
 			return nil, err
 		}
@@ -133,7 +135,7 @@ func (q *Queries) GetSeriesByCategory(ctx context.Context, categoryID *int64) ([
 }
 
 const getSeriesByID = `-- name: GetSeriesByID :one
-SELECT id, title, description, cover_url, uploaded_by
+SELECT id, title, description, cover_url, category_id, uploaded_by
 FROM series
 WHERE id = $1
 `
@@ -143,6 +145,7 @@ type GetSeriesByIDRow struct {
 	Title       string
 	Description *string
 	CoverUrl    *string
+	CategoryID  *int64
 	UploadedBy  *int64
 }
 
@@ -154,13 +157,14 @@ func (q *Queries) GetSeriesByID(ctx context.Context, id int64) (GetSeriesByIDRow
 		&i.Title,
 		&i.Description,
 		&i.CoverUrl,
+		&i.CategoryID,
 		&i.UploadedBy,
 	)
 	return i, err
 }
 
 const getSeriesByUser = `-- name: GetSeriesByUser :many
-SELECT id, title, description, cover_url
+SELECT id, title, description, cover_url, category_id
 FROM series
 WHERE uploaded_by = $1
 `
@@ -170,6 +174,7 @@ type GetSeriesByUserRow struct {
 	Title       string
 	Description *string
 	CoverUrl    *string
+	CategoryID  *int64
 }
 
 func (q *Queries) GetSeriesByUser(ctx context.Context, uploadedBy *int64) ([]GetSeriesByUserRow, error) {
@@ -186,6 +191,7 @@ func (q *Queries) GetSeriesByUser(ctx context.Context, uploadedBy *int64) ([]Get
 			&i.Title,
 			&i.Description,
 			&i.CoverUrl,
+			&i.CategoryID,
 		); err != nil {
 			return nil, err
 		}
@@ -198,7 +204,7 @@ func (q *Queries) GetSeriesByUser(ctx context.Context, uploadedBy *int64) ([]Get
 }
 
 const searchSeries = `-- name: SearchSeries :many
-SELECT id, title, description, cover_url
+SELECT id, title, description, cover_url, category_id
 FROM series
 WHERE title ILIKE '%' || $1 || '%'
 `
@@ -208,6 +214,7 @@ type SearchSeriesRow struct {
 	Title       string
 	Description *string
 	CoverUrl    *string
+	CategoryID  *int64
 }
 
 func (q *Queries) SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchSeriesRow, error) {
@@ -224,6 +231,7 @@ func (q *Queries) SearchSeries(ctx context.Context, dollar_1 *string) ([]SearchS
 			&i.Title,
 			&i.Description,
 			&i.CoverUrl,
+			&i.CategoryID,
 		); err != nil {
 			return nil, err
 		}
