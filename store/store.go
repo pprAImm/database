@@ -16,6 +16,7 @@ type Store interface {
 	// Series
 	GetSeriesByCategory(ctx context.Context, categoryID *int64) ([]db.GetSeriesByCategoryRow, error)
 	GetSeriesByID(ctx context.Context, id int64) (db.GetSeriesByIDRow, error)
+	GetSeriesByUser(ctx context.Context, userID *int64) ([]db.GetSeriesByUserRow, error)
 	SearchSeries(ctx context.Context, query *string) ([]db.SearchSeriesRow, error)
 
 	// Episodes
@@ -69,6 +70,10 @@ func (s *pgxStore) GetSeriesByCategory(ctx context.Context, categoryID *int64) (
 
 func (s *pgxStore) GetSeriesByID(ctx context.Context, id int64) (db.GetSeriesByIDRow, error) {
 	return s.queries.GetSeriesByID(ctx, id)
+}
+
+func (s *pgxStore) GetSeriesByUser(ctx context.Context, userID *int64) ([]db.GetSeriesByUserRow, error) {
+	return s.queries.GetSeriesByUser(ctx, userID)
 }
 
 func (s *pgxStore) SearchSeries(ctx context.Context, query *string) ([]db.SearchSeriesRow, error) {
