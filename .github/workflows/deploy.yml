@@ -40,12 +40,12 @@ jobs:
 
       - name: Copy migrations to server
         run: |
-          ssh -o StrictHostKeyChecking=no root@185.23.34.25 "mkdir -p /root/migrations"
+          ssh -o StrictHostKeyChecking=no root@139.100.235.63 "mkdir -p /root/migrations"
           scp -o StrictHostKeyChecking=no sql/migrations/*.sql root@185.23.34.25:/root/migrations/
 
       - name: Deploy on server
         run: |
-          ssh -o StrictHostKeyChecking=no root@185.23.34.25 << 'EOF'
+          ssh -o StrictHostKeyChecking=no root@139.100.235.63 << 'EOF'
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
             docker pull ghcr.io/ppraimm/database:latest
             docker stop database || true
@@ -62,7 +62,7 @@ jobs:
 
       - name: Run migrations on remote DB
         run: |
-          ssh -o StrictHostKeyChecking=no root@185.23.34.25 << 'EOF'
+          ssh -o StrictHostKeyChecking=no root@139.100.235.63 << 'EOF'
             sleep 5
             for f in /root/migrations/*.sql; do
               echo "Running migration: $f"
