@@ -48,11 +48,12 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@139.100.235.63 << 'EOF'
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
             docker pull ghcr.io/ppraimm/database:latest
-            docker stop database || true
-            docker rm database || true
+            docker stop postgres || true
+            docker rm postgres || true
             docker run -d \
-              --name database \
+              --name postgres \
               --restart always \
+              --network app-network \
               -p 5432:5432 \
               -v database_data:/var/lib/postgresql/data \
               --env-file /root/.env \
@@ -66,6 +67,6 @@ jobs:
             sleep 5
             for f in /root/migrations/*.sql; do
               echo "Running migration: $f"
-              docker exec -i database sh -c 'psql "$DATABASE_URL"' < "$f"
+              docker exec -i postgres sh -c 'psql "$DATABASE_URL"' < "$f"
             done
           EOF
